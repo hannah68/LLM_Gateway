@@ -1,10 +1,10 @@
 # LLM Gateway — System Design
 
-## Problem
+1. Problem
 
 When multiple applications within an organisation use LLM providers directly, each application may need to independently handle concerns such as authentication, usage controls, rate limiting, and usage tracking. This creates duplicated logic and makes it difficult for the organisation to centrally understand which applications are making requests, how much they are using, and how much they cost. Applications can also become coupled to provider-specific APIs and configurations, meaning that changing or adding an LLM provider may require changes across multiple applications. As the number of AI applications grows, managing these concerns independently becomes increasingly difficult.
 
-## Goals
+2. Goals
 
 - Centralise LLM provider integrations so client applications do not need to implement provider-specific integrations independently.
 - Authenticate client applications and control access to the gateway using API keys.
@@ -14,7 +14,7 @@ When multiple applications within an organisation use LLM providers directly, ea
 - Track spending and enforce configurable monthly budgets for each project.
 - Cache exact requests so repeated requests can reuse a previous response when appropriate, reducing unnecessary provider calls, cost and latency.
 
-## Out of Scope for V1
+3. Out of Scope for V1
 
 The following are intentionally outside the scope of V1:
 
@@ -26,7 +26,7 @@ The following are intentionally outside the scope of V1:
 - **Kubernetes or multi-region deployment** — these solve infrastructure and scaling problems that our V1 does not yet have.
 - **Advanced provider resilience** — provider fallback, retries and a more sophisticated timeout strategy are deferred until after the core gateway works.
 
-## Users
+4. Users
 
 The system has direct and indirect users.
 
@@ -42,7 +42,7 @@ Admins and developers are direct human users. They use the admin dashboard to ma
 
 End users are indirect users, such as customers or employees using an AI-powered application. They interact with the client application rather than with the LLM gateway directly. The gateway does not authenticate individual end users in V1.
 
-## V1 Requirements
+5. V1 Requirements
 
 ### Chat Requests
 
@@ -125,3 +125,15 @@ flowchart TD
     K --> L[Cache successful response]
     L --> M[Return response]
 ```
+
+### Admin Dashboard
+
+- Admins must be able to view and manage organisations and their projects.
+- Admins must be able to create projects within an organisation.
+- Admins must be able to generate and revoke API keys for projects.
+- Newly generated API keys must be displayed only once.
+- Admins must be able to configure API-key rate limits and project monthly budgets.
+- Admins must be able to view usage statistics, estimated costs, request counts, latency and errors.
+- Admins must be able to inspect request history for individual projects.
+- The dashboard must communicate with the gateway backend through an Admin API.
+- Access to organisation data must be restricted to authorised administrators.

@@ -137,3 +137,33 @@ flowchart TD
 - Admins must be able to inspect request history for individual projects.
 - The dashboard must communicate with the gateway backend through an Admin API.
 - Access to organisation data must be restricted to authorised administrators.
+
+## Non-functional Requirements
+
+### Security and Data Isolation
+
+- The backend must enforce authentication and authorisation independently of the frontend.
+- Users must only be able to access organisations and resources they are authorised to access.
+- Client API keys must not grant administrative permissions.
+- API keys and provider credentials must be protected from unauthorised access.
+- Data belonging to different organisations must remain logically isolated.
+
+### Reliability
+
+- The gateway must handle LLM provider failures without crashing.
+- The gateway must return appropriate HTTP error responses when requests cannot be completed.
+- Provider failures must be recorded so administrators can investigate them.
+- Error responses must not expose sensitive information such as API keys or provider credentials.
+
+### Performance
+
+- The gateway should minimise additional latency introduced by authentication, rate limiting, budget checks and usage tracking.
+- Cached responses should avoid unnecessary calls to LLM providers.
+- The gateway must record request latency to help identify performance problems.
+
+### Observability
+
+- The gateway must record useful information about successful and failed LLM requests.
+- Each request should have a unique request identifier to help with debugging.
+- Error records should identify the type of failure without exposing sensitive information.
+- Administrators should be able to inspect request counts, latency, errors and estimated costs.

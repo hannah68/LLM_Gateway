@@ -167,3 +167,62 @@ flowchart TD
 - Each request should have a unique request identifier to help with debugging.
 - Error records should identify the type of failure without exposing sensitive information.
 - Administrators should be able to inspect request counts, latency, errors and estimated costs.
+
+### Rate Limiting Availability
+
+The gateway will fail closed when Redis rate limiting is unavailable.
+Requests will be rejected with HTTP 503 rather than forwarded to the LLM provider without rate-limit checks.
+This prioritises cost protection over availability.
+The trade-off is that legitimate requests may be temporarily rejected during Redis outages.
+
+### Provider Abstraction
+
+The gateway will use a shared provider interface.
+
+Each provider implementation will handle its own authentication, request formatting and response mapping.
+
+The main chat endpoint will interact with providers through this interface rather than containing provider-specific API logic.
+
+V1 will include a mock provider and one real LLM provider.
+
+### Model Routing
+
+Clients specify the model they want to use, without needing to specify the LLM provider.
+
+The gateway maps supported model identifiers to provider implementations.
+
+Unsupported models are rejected before any provider call.
+
+V1 uses a simple model-to-provider mapping.
+
+## High-Level Architecture
+
+flowchart TB
+Client["Client Applications"]
+Admin["React Admin Dashboard"]
+
+    subgraph Gateway["FastAPI — LLM Gateway"]
+        Chat["Client API: POST /v1/chat"]
+        AdminAPI["Admin API"]
+        Services["Gateway Services"]
+        Router["Model Router"]
+        Provider["Provider Interface"]
+    end
+
+    PG[("PostgreSQL")]
+    Redis[("Redis")]
+    Mock["Mock LLM Provider"]
+    Real["Real LLM Provider"]
+
+    Client --> Chat
+    Admin --> AdminAPI
+    Chat --> Services
+    AdminAPI --> PG
+    Services <--> PG
+    Services <--> Redis
+    Services --> Router
+    Router --> Provider
+    Provider --> Mock
+    Provider --> Real
+
+    Client applications communicate with the gateway through the Chat API, while administrators use a React dashboard that communicates with a separate Admin API. FastAPI handles authentication, authorisation and gateway business logic. PostgreSQL stores persistent data, Redis handles rate limiting and temporary caching, and a provider abstraction allows the gateway to communicate with different LLM providers.

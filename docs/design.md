@@ -197,6 +197,8 @@ V1 uses a simple model-to-provider mapping.
 
 ## High-Level Architecture
 
+```mermaid
+
 flowchart TB
 Client["Client Applications"]
 Admin["React Admin Dashboard"]
@@ -224,5 +226,6 @@ Admin["React Admin Dashboard"]
     Router --> Provider
     Provider --> Mock
     Provider --> Real
+```
 
     Client applications communicate with the gateway through the Chat API, while administrators use a React dashboard that communicates with a separate Admin API. FastAPI handles authentication, authorisation and gateway business logic. PostgreSQL stores persistent data, Redis handles rate limiting and temporary caching, and a provider abstraction allows the gateway to communicate with different LLM providers.

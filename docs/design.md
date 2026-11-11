@@ -228,4 +228,34 @@ Admin["React Admin Dashboard"]
     Provider --> Real
 ```
 
-    Client applications communicate with the gateway through the Chat API, while administrators use a React dashboard that communicates with a separate Admin API. FastAPI handles authentication, authorisation and gateway business logic. PostgreSQL stores persistent data, Redis handles rate limiting and temporary caching, and a provider abstraction allows the gateway to communicate with different LLM providers.
+Client applications communicate with the gateway through the Chat API, while administrators use a React dashboard that communicates with a separate Admin API. FastAPI handles authentication, authorisation and gateway business logic. PostgreSQL stores persistent data, Redis handles rate limiting and temporary caching, and a provider abstraction allows the gateway to communicate with different LLM providers.
+
+## Complete Lifecycle
+
+```mermaid
+flowchart TD
+    A["Client sends POST /v1/chat"] --> B["Authenticate API key"]
+    B --> C{"Valid and active?"}
+    C -->|No| D["Return 401"]
+    C -->|Yes| E["Validate request"]
+    E --> F{"Valid input?"}
+    F -->|No| G["Return 422"]
+    F -->|Yes| H["Check Redis rate limit"]
+    H --> I{"Allowed?"}
+    I -->|No| J["Return 429"]
+    I -->|Yes| K["Check Redis cache"]
+    K --> L{"Cache hit?"}
+    L -->|Yes| M["Record cache hit"]
+    M --> N["Return cached response"]
+    L -->|No| O["Check monthly budget"]
+    O --> P{"Budget available?"}
+    P -->|No| Q["Reject request"]
+    P -->|Yes| R["Select LLM provider"]
+    R --> S["Call provider"]
+    S --> T["Record usage, cost, latency and status"]
+    T --> U{"Successful?"}
+    U -->|Yes| V["Cache response"]
+    V --> W["Return response"]
+    U -->|No| X["Return appropriate error"]
+
+```
